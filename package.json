@@ -1,0 +1,16 @@
+{
+  "name": "tracking-automation-ups-rithum",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Browser automation for copying UPS tracking into Rithum orders.",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "codegen": "playwright codegen",
+    "prepare": "playwright install chromium"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "playwright": "^1.53.1"
+  }
+}
