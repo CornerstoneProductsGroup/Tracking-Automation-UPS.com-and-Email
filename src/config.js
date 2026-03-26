@@ -28,7 +28,7 @@ export const config = {
   headless: toBoolean(process.env.HEADLESS, false),
   loginDelayMs: Number(process.env.LOGIN_DELAY_MS || 5000),
   defaultShipMethod: process.env.DEFAULT_SHIP_METHOD || 'UPS Ground',
-  defaultShipQuantityMode: process.env.DEFAULT_SHIP_QUANTITY_MODE || 'remaining'
+  defaultShipQuantityMode: process.env.DEFAULT_SHIP_QUANTITY_MODE || 'remaining',
   // Microsoft Graph API config for Outlook email access
   msGraphClientId: process.env.MS_GRAPH_CLIENT_ID || '',
   msGraphClientSecret: process.env.MS_GRAPH_CLIENT_SECRET || '',
