@@ -157,29 +157,71 @@ async function getOpenOrders(page) {
 }
 
 async function readUpsRows(page) {
-  const rows = page.locator('table tbody tr');
-  const count = await rows.count();
-  const shipments = [];
-
-  for (let index = 0; index < count; index += 1) {
-    const row = rows.nth(index);
-    const cells = row.locator('td');
-    const cellCount = await cells.count();
-
-    if (cellCount < 5) {
-      continue;
-    }
-
-    const shipToName = normalizeText(await cells.nth(2).innerText());
-    const trackingNumber = normalizeText(await cells.nth(4).innerText()).toUpperCase();
-
-    shipments.push({
-      index,
-      shipToName,
-      trackingNumber
-    });
+  let shipments = [];
+  let pageNum = 1;
+  // Find column indexes by header text
+  let shipToCol = null;
+  let trackingCol = null;
+  // Wait for table header
+  await page.waitForSelector('table thead tr th');
+  const headers = page.locator('table thead tr th');
+  const headerCount = await headers.count();
+  for (let i = 0; i < headerCount; i++) {
+    const text = (await headers.nth(i).innerText()).replace(/\s+/g, ' ').trim().toLowerCase();
+    if (text.includes('ship to') && text.includes('company')) shipToCol = i;
+    if (text.includes('tracking')) trackingCol = i;
   }
-
+  if (shipToCol == null || trackingCol == null) {
+    throw new Error('Could not find Ship To or Tracking # columns in UPS table header.');
+  }
+  while (true) {
+    await page.waitForSelector('table tbody tr');
+    const rows = page.locator('table tbody tr');
+    const count = await rows.count();
+    for (let index = 0; index < count; index += 1) {
+      const row = rows.nth(index);
+      const cells = row.locator('td');
+      const cellCount = await cells.count();
+      if (cellCount <= Math.max(shipToCol, trackingCol)) continue;
+      // Ship To cell may have a span
+      let shipToName = '';
+      try {
+        const shipToCell = cells.nth(shipToCol);
+        const shipToSpan = shipToCell.locator('span');
+        if (await shipToSpan.count() > 0) {
+          shipToName = normalizeText(await shipToSpan.first().innerText());
+        } else {
+          shipToName = normalizeText(await shipToCell.innerText());
+        }
+      } catch (e) {}
+      // Tracking cell may have a link
+      let trackingNumber = '';
+      try {
+        const trackingCell = cells.nth(trackingCol);
+        const trackingLink = trackingCell.locator('a');
+        if (await trackingLink.count() > 0) {
+          trackingNumber = (await trackingLink.first().innerText()).trim().toUpperCase();
+        } else {
+          trackingNumber = (await trackingCell.innerText()).trim().toUpperCase();
+        }
+      } catch (e) {}
+      shipments.push({
+        page: pageNum,
+        index,
+        shipToName,
+        trackingNumber
+      });
+    }
+    // Look for a next page button that is enabled
+    const nextBtn = page.locator('button[aria-label="Next Page"]:not([disabled])');
+    if (await nextBtn.count() > 0) {
+      await nextBtn.click();
+      await page.waitForTimeout(1000);
+      pageNum += 1;
+    } else {
+      break;
+    }
+  }
   return shipments;
 }
 
