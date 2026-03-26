@@ -61,6 +61,10 @@ async function loginToUps(page) {
   await passwordInput.fill(config.upsPassword);
   await page.locator('button._button-login-password').click();
 
+  // Pause here so user can handle 2FA, captcha, or other manual steps if needed
+  console.log('If there is a 2FA, captcha, or extra step, complete it in the browser and then press Enter in the terminal to continue.');
+  await page.pause();
+
   await page.waitForLoadState('domcontentloaded');
 }
 
@@ -83,26 +87,8 @@ async function loginToRithum(page) {
 
   await page.waitForTimeout(config.loginDelayMs);
 
-  const profileLink = page
-    .locator('a.application-identity-item')
-    .filter({ hasText: config.rithumProfileName })
-    .first();
-  await waitForVisible(profileLink, 60000);
-  await profileLink.click();
-
-  const homeDepotOrdersLink = page.locator(`a[href="gotoOpenOrders.do?PID=${config.rithumMerchantId}"]`).first();
-  await waitForVisible(homeDepotOrdersLink, 60000);
-  await homeDepotOrdersLink.click();
-
-  const openNoActivityLink = page
-    .locator(
-      `a[href="gotoOrderRealmForm.do?action=web_quickship&tabContext=web_quickship&status=open&substatus=no-activity&merchant=${config.rithumMerchantId}"]`
-    )
-    .first();
-  await waitForVisible(openNoActivityLink, 60000);
-  await openNoActivityLink.click();
-
-  await page.waitForLoadState('domcontentloaded');
+  // Go directly to the open orders page after login
+  await page.goto(config.rithumOrdersUrl, { waitUntil: 'domcontentloaded' });
 }
 
 async function getOpenOrders(page) {

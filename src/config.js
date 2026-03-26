@@ -24,6 +24,7 @@ export const config = {
   rithumProfileName:
     process.env.RITHUM_PROFILE_NAME || 'Cornerstone Products Group',
   rithumMerchantId: process.env.RITHUM_MERCHANT_ID || 'thehomedepot',
+  rithumOrdersUrl: process.env.RITHUM_ORDERS_URL || 'https://dsm.commercehub.com/dsm/gotoOrderRealmForm.do?action=web_quickship&tabContext=web_quickship&status=open&substatus=no-activity&merchant=thehomedepot',
   headless: toBoolean(process.env.HEADLESS, false),
   loginDelayMs: Number(process.env.LOGIN_DELAY_MS || 5000),
   defaultShipMethod: process.env.DEFAULT_SHIP_METHOD || 'UPS Ground',
