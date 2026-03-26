@@ -10,7 +10,9 @@
     "prepare": "playwright install chromium"
   },
   "dependencies": {
+    "@microsoft/microsoft-graph-client": "^3.0.7",
     "dotenv": "^16.4.5",
+    "isomorphic-fetch": "^3.0.0",
     "playwright": "^1.53.1"
   }
 }
