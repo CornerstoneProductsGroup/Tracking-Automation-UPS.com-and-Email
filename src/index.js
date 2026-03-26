@@ -44,27 +44,16 @@ async function waitForVisible(locator, timeout = 30000) {
 }
 
 async function loginToUps(page) {
-  if (!config.upsUsername || !config.upsPassword) {
-    throw new Error('Missing UPS_USERNAME or UPS_PASSWORD in environment.');
-  }
-
+  // Only open the UPS URL and wait for user to log in manually
   await page.goto(config.upsHistoryUrl, { waitUntil: 'domcontentloaded' });
-
-  const usernameInput = page.locator('#username');
-  await waitForVisible(usernameInput);
-  await usernameInput.fill(config.upsUsername);
-  await page.waitForTimeout(config.loginDelayMs);
-  await page.locator('button._button-login-id').click();
-
-  const passwordInput = page.locator('#password');
-  await waitForVisible(passwordInput);
-  await passwordInput.fill(config.upsPassword);
-  await page.locator('button._button-login-password').click();
-
-  // Pause here so user can handle 2FA, captcha, or other manual steps if needed
-  console.log('If there is a 2FA, captcha, or extra step, complete it in the browser and then press Enter in the terminal to continue.');
-  await page.pause();
-
+  console.log('Please log in to UPS.com manually in the opened browser window. Complete any CAPTCHA or security steps. When you are fully logged in and see your shipping history, press Enter in the terminal to continue.');
+  await new Promise((resolve) => {
+    process.stdin.resume();
+    process.stdin.once('data', () => {
+      process.stdin.pause();
+      resolve();
+    });
+  });
   await page.waitForLoadState('domcontentloaded');
 }
 
